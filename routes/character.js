@@ -1,17 +1,27 @@
 const express = require('express')
 const router = express.Router()
+const mysql = require('../mysql/mysql').pool;
 
 router.get('/', (req, res, next) => {
-    res.status(200).send({
-        msg: 'ok'
+    mysql.getConnection((error, conn) => {
+        if(error) { return res.status(500).send({error: error}) }
+        conn.query('SELECT * FROM characters;', (error, result, fields) => {
+            if(error) { return res.status(500).send({error: error}) }
+            return res.status(200).send(result)
+        });
+
     })
 })
 
 router.get('/:id', (req, res, next) => {
-    const id = req.params.id
-    res.status(200).send({
-        msg: 'ok',
-        id: id
+    mysql.getConnection((error, conn) => {
+        if(error) { return res.status(500).send({error: error}) }
+        conn.query('SELECT * FROM characters WHERE id = ?;', [req.params.id],
+        (error, result, fields) => {
+            if(error) { return res.status(500).send({error: error}) }
+            return res.status(200).send(result)
+        });
+
     })
 })
 
