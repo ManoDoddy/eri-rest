@@ -6,6 +6,7 @@ const bodyParser = require('body-parser')
 const charactersRoute = require('./routes/character')
 
 app.use(morgan('dev'))
+app.use('/images', express.static('images'))
 app.use(express.urlencoded({extended: false}))
 app.use(express.json())
 
