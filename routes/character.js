@@ -49,7 +49,7 @@ router.get('/:id', (req, res, next) => {
                         name: result[0].name,
                         anime_id: result[0].anime_id,
                         anime_name: result[0].anime_name,
-                        photos: 'http://localhost:3000/'+result[0].id+'/images',
+                        photos: 'http://localhost:3000/character/'+result[0].id+'/images',
                         request: {
                             type: 'GET',
                             desc: 'return all characters',
