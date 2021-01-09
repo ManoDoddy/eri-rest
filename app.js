@@ -1,9 +1,10 @@
 const express = require('express')
 const app = express()
 const morgan = require('morgan')
-const bodyParser = require('body-parser')
+//const bodyParser = require('body-parser')
 
 const charactersRoute = require('./routes/character')
+const animesRoute = require('./routes/anime')
 
 app.use(morgan('dev'))
 app.use('/images', express.static('images'))
@@ -18,11 +19,11 @@ app.use((req, res, next) =>{
         res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET')
         return res.status(200).send({})
     }
-
     next()
 })
 
 app.use('/character', charactersRoute)
+app.use('/anime', animesRoute)
 
 app.use((req, res, next) => {
     const err = new Error('not found')
@@ -34,7 +35,7 @@ app.use((error, req, res, next) => {
     res.status(error.status || 500)
     return res.send({
         err: {
-            msg: error.message
+            message: error.message
         }
     })
 })
