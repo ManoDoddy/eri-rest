@@ -62,6 +62,37 @@ router.get('/:id', (req, res, next) => {
     })
 })
 
+router.get('/search/:name', (req, res, next) => {
+    mysql.getConnection((error, conn) => {
+        if(error) { return res.status(500).send({error: error}) }
+        conn.query('SELECT characters.id, characters.name, anime.id as `anime_id`, anime.name as `anime_name` FROM characters INNER JOIN anime ON characters.id_anime = anime.id WHERE characters.name = ?;', [req.params.id],
+        (error, result, fields) => {
+            conn.release()
+            if(error) { return res.status(500).send({error: error}) }
+            if(result.length == 0){
+                return res.status(404).send({
+                    message: 'id not found'
+                })
+            }
+            const response = {
+                character: {
+                        id: result[0].id,
+                        name: result[0].name,
+                        anime_id: result[0].anime_id,
+                        anime_name: result[0].anime_name,
+                        photos: 'http://localhost:3000/character/'+result[0].id+'/images',
+                        request: {
+                            type: 'GET',
+                            desc: 'return all characters',
+                            url: 'http://localhost:3000/character/'
+                        }
+                }
+            }
+            return res.status(200).send(response)
+        });
+    })
+})
+
 router.get('/:id/images', (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if(error) { return res.status(500).send({error: error}) }
@@ -76,7 +107,7 @@ router.get('/:id/images', (req, res, next) => {
             }
             const response = {
                 amount: result.length,
-                characters: result.map(image => {
+                character: result.map(image => {
                     return {
                         id: image.id,
                         id_character: image.id_character,
