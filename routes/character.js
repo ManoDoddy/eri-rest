@@ -65,13 +65,13 @@ router.get('/:id', (req, res, next) => {
 router.get('/search/:name', (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if(error) { return res.status(500).send({error: error}) }
-        conn.query('SELECT characters.id, characters.name, anime.id as `anime_id`, anime.name as `anime_name` FROM characters INNER JOIN anime ON characters.id_anime = anime.id WHERE characters.name = ?;', [req.params.id],
+        conn.query('SELECT characters.id, characters.name, anime.id as `anime_id`, anime.name as `anime_name` FROM characters INNER JOIN anime ON characters.id_anime = anime.id WHERE characters.name = ?;', [req.params.name],
         (error, result, fields) => {
             conn.release()
             if(error) { return res.status(500).send({error: error}) }
             if(result.length == 0){
                 return res.status(404).send({
-                    message: 'id not found'
+                    message: 'character not found'
                 })
             }
             const response = {
