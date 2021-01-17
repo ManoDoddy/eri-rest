@@ -1,15 +1,15 @@
 const express = require('express')
 const app = express()
 const morgan = require('morgan')
-//const bodyParser = require('body-parser')
+const bodyParser = require('body-parser')
 
 const charactersRoute = require('./routes/character')
 const animesRoute = require('./routes/anime')
 
 app.use(morgan('dev'))
 app.use('/images', express.static('images'))
-app.use(express.urlencoded({extended: false}))
-app.use(express.json())
+app.use(bodyParser.urlencoded({extended: false}))
+app.use(bodyParser.json())
 
 app.use((req, res, next) =>{
     res.header('Access-Control-Allow-Origin','*')

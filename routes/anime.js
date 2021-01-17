@@ -57,8 +57,75 @@ router.get('/:id', (req, res, next) => {
 })
 
 router.post('/', (req, res, next)=> {
-    res.status(201).send({
-        message: 'coming soon'
+    mysql.getConnection((error, conn) =>{
+        if(error) { return res.status(500).send({error: error}) }
+        conn.query('INSERT INTO anime (name) VALUES (?)',[req.body.name],
+            (error,result,fields) =>{
+                conn.release()
+                if(error) { return res.status(500).send({error: error}) }
+                const response = {
+                    message: 'anime successfully inserted',
+                    anime: {
+                        id: result.insertId,
+                        name: req.body.name,
+                        request: {
+                            type: 'GET',
+                            desc: 'return all animes',
+                            url: 'http://localhost:3000/anime/'
+                        }
+                    }
+                }
+                return res.status(201).send(response)
+        })
+    })
+})
+
+router.patch('/', (req, res, next)=> {
+    mysql.getConnection((error, conn) =>{
+        if(error) { return res.status(500).send({error: error}) }
+        conn.query('UPDATE anime SET name = ? WHERE id = ?',[req.body.name,req.body.id],
+            (error,result,fields) =>{
+                conn.release()
+                if(error) { return res.status(500).send({error: error}) }
+                const response = {
+                    message: 'anime successfully updated',
+                    anime: {
+                        id: req.body.id,
+                        name: req.body.name,
+                        request: {
+                            type: 'GET',
+                            desc: 'returns individual anime details',
+                            url: 'http://localhost:3000/anime/' + req.body.id
+                        }
+                    }
+                }
+                res.status(202).send(response)
+            }
+        )
+    })
+})
+
+router.delete('/', (req, res, next)=> {
+    mysql.getConnection((error, conn) =>{
+        if(error) { return res.status(500).send({error: error}) }
+        conn.query('DELETE FROM anime WHERE id = ?',[req.body.id],
+            (error,result,fields) =>{
+                conn.release()
+                if(error) { return res.status(500).send({error: error}) }
+                const response = {
+                    message: 'anime successfully deleted',
+                    request: {
+                        type: 'POST',
+                        desc: 'insert a new anime',
+                        url: 'http://localhost:3000/anime/',
+                        body: {
+                            name: 'STRING'
+                        }
+                    }
+                }
+                res.status(202).send(response)
+            }
+        )
     })
 })
 

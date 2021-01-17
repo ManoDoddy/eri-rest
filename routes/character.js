@@ -126,8 +126,78 @@ router.get('/:id/images', (req, res, next) => {
 })
 
 router.post('/', (req, res, next)=> {
-    res.status(201).send({
-        message: 'coming soon'
+    mysql.getConnection((error, conn) =>{
+        if(error) { return res.status(500).send({error: error}) }
+        conn.query('INSERT INTO characters (name, id_anime) VALUES (? , ?)',[req.body.name, req.body.id_anime],
+            (error, result, fields) =>{
+                conn.release()
+                if(error) { return res.status(500).send({error: error}) }
+                const response = {
+                    message: 'character successfully inserted',
+                    character: {
+                        id: result.insertId,
+                        name: req.body.name,
+                        id_anime: req.body.id_anime,
+                        request: {
+                            type: 'GET',
+                            desc: 'return all characters',
+                            url: 'http://localhost:3000/character/'
+                        }
+                    }
+                }
+                return res.status(201).send(response)
+        })
+    })
+})
+
+router.patch('/', (req, res, next)=> {
+    mysql.getConnection((error, conn) =>{
+        if(error) { return res.status(500).send({error: error}) }
+        conn.query('UPDATE characters SET name = ?, id_anime = ? WHERE id = ?',[req.body.name,req.body.id_anime,req.body.id],
+            (error,result,fields) =>{
+                conn.release()
+                if(error) { return res.status(500).send({error: error}) }
+                const response = {
+                    message: 'character successfully updated',
+                    character: {
+                        id: req.body.id,
+                        name: req.body.name,
+                        id_anime: req.body.id_anime,
+                        request: {
+                            type: 'GET',
+                            desc: 'returns individual character details',
+                            url: 'http://localhost:3000/character/' + req.body.id
+                        }
+                    }
+                }
+                res.status(202).send(response)
+            }
+        )
+    })
+})
+
+router.delete('/', (req, res, next)=> {
+    mysql.getConnection((error, conn) =>{
+        if(error) { return res.status(500).send({error: error}) }
+        conn.query('DELETE FROM characters WHERE id = ?',[req.body.id],
+            (error,result,fields) =>{
+                conn.release()
+                if(error) { return res.status(500).send({error: error}) }
+                const response = {
+                    message: 'character successfully deleted',
+                    request: {
+                        type: 'POST',
+                        desc: 'insert a new character',
+                        url: 'http://localhost:3000/character/',
+                        body: {
+                            name: 'STRING',
+                            id_anime: 'INTEGER'
+                        }
+                    }
+                }
+                res.status(202).send(response)
+            }
+        )
     })
 })
 
