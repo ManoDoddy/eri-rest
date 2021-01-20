@@ -5,6 +5,7 @@ const bodyParser = require('body-parser')
 
 const charactersRoute = require('./routes/character')
 const animesRoute = require('./routes/anime')
+const userRoute = require('./routes/user')
 
 app.use(morgan('dev'))
 app.use('/images', express.static('images'))
@@ -24,6 +25,7 @@ app.use((req, res, next) =>{
 
 app.use('/character', charactersRoute)
 app.use('/anime', animesRoute)
+app.use('/user', userRoute)
 
 app.use((req, res, next) => {
     const err = new Error('not found')

@@ -32,3 +32,11 @@ CREATE TABLE `eri`.`character_photos` (
 ENGINE = InnoDB;
 
 ALTER TABLE `eri`.`character` RENAME TO `eri`.`characters`;
+
+CREATE TABLE `eri`.`user` (
+  `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  `username` VARCHAR(45) NOT NULL DEFAULT '',
+  `password` VARCHAR(100) NOT NULL DEFAULT '',
+  PRIMARY KEY(`id`)
+)
+ENGINE = InnoDB;

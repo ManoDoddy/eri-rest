@@ -1,6 +1,33 @@
 const express = require('express')
 const router = express.Router()
 const mysql = require('../mysql/mysql').pool
+const multer = require('multer')
+const login = require('../middleware/login')
+
+const storage = multer.diskStorage({
+    destination: function(request, file, cb) {
+        cb(null, './images/')
+    },
+    filename: function(request, file, cb) {
+        cb(null, new Date().toISOString().replace(/[:.-]/g, '')+'.'+file.originalname.split('.').pop())
+    },
+})
+
+const fileFilter = (req, file, cb) => {
+    if(file.mimetype === 'image/jpeg' || file.mimetype == 'image/png'){
+        cb(null, true)
+    }else{
+        cb(null, false)
+    }
+}
+
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 1024 * 1024 * 2,
+    },
+    fileFilter: fileFilter
+})
 
 router.get('/', (req, res, next) => {
     mysql.getConnection((error, conn) => {
@@ -125,7 +152,8 @@ router.get('/:id/images', (req, res, next) => {
     })
 })
 
-router.post('/', (req, res, next)=> {
+router.post('/', login.required ,upload.single('character_image') ,(req, res, next)=> {
+    console.log(req.file)
     mysql.getConnection((error, conn) =>{
         if(error) { return res.status(500).send({error: error}) }
         conn.query('INSERT INTO characters (name, id_anime) VALUES (? , ?)',[req.body.name, req.body.id_anime],
@@ -137,7 +165,7 @@ router.post('/', (req, res, next)=> {
                     character: {
                         id: result.insertId,
                         name: req.body.name,
-                        id_anime: req.body.id_anime,
+                        anime_id: req.body.id_anime,
                         request: {
                             type: 'GET',
                             desc: 'return all characters',
@@ -150,7 +178,7 @@ router.post('/', (req, res, next)=> {
     })
 })
 
-router.patch('/', (req, res, next)=> {
+router.patch('/', login.required ,(req, res, next)=> {
     mysql.getConnection((error, conn) =>{
         if(error) { return res.status(500).send({error: error}) }
         conn.query('UPDATE characters SET name = ?, id_anime = ? WHERE id = ?',[req.body.name,req.body.id_anime,req.body.id],
@@ -176,7 +204,7 @@ router.patch('/', (req, res, next)=> {
     })
 })
 
-router.delete('/', (req, res, next)=> {
+router.delete('/', login.required ,(req, res, next)=> {
     mysql.getConnection((error, conn) =>{
         if(error) { return res.status(500).send({error: error}) }
         conn.query('DELETE FROM characters WHERE id = ?',[req.body.id],

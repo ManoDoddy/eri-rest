@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const mysql = require('../mysql/mysql').pool
+const login = require('../middleware/login')
 
 router.get('/', (req, res, next) => {
     mysql.getConnection((error, conn) => {
@@ -56,7 +57,7 @@ router.get('/:id', (req, res, next) => {
     })
 })
 
-router.post('/', (req, res, next)=> {
+router.post('/', login.required ,(req, res, next)=> {
     mysql.getConnection((error, conn) =>{
         if(error) { return res.status(500).send({error: error}) }
         conn.query('INSERT INTO anime (name) VALUES (?)',[req.body.name],
@@ -80,7 +81,7 @@ router.post('/', (req, res, next)=> {
     })
 })
 
-router.patch('/', (req, res, next)=> {
+router.patch('/', login.required ,(req, res, next)=> {
     mysql.getConnection((error, conn) =>{
         if(error) { return res.status(500).send({error: error}) }
         conn.query('UPDATE anime SET name = ? WHERE id = ?',[req.body.name,req.body.id],
@@ -105,7 +106,7 @@ router.patch('/', (req, res, next)=> {
     })
 })
 
-router.delete('/', (req, res, next)=> {
+router.delete('/', login.required ,(req, res, next)=> {
     mysql.getConnection((error, conn) =>{
         if(error) { return res.status(500).send({error: error}) }
         conn.query('DELETE FROM anime WHERE id = ?',[req.body.id],
