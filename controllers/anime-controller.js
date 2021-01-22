@@ -97,7 +97,7 @@ exports.updateAnime = (req, res, next)=> {
                         }
                     }
                 }
-                res.status(202).send(response)
+                return res.status(202).send(response)
             }
         )
     })
@@ -121,7 +121,7 @@ exports.deleteAnime = (req, res, next)=> {
                         }
                     }
                 }
-                res.status(202).send(response)
+                return res.status(202).send(response)
             }
         )
     })

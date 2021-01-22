@@ -147,6 +147,31 @@ exports.insertCharacter = (req, res, next)=> {
     })
 }
 
+exports.insertCharacterImage = (req, res, next)=> {
+    mysql.getConnection((error, conn) =>{
+        if(error) { return res.status(500).send({error: error}) }
+        conn.query('INSERT INTO character_photos (id_character, name) VALUES (? , ?)',[req.params.id, req.file.filename],
+            (error, result, fields) =>{
+                conn.release()
+                if(error) { return res.status(500).send({error: error}) }
+                const response = {
+                    message: 'character image successfully inserted',
+                    image: {
+                        id: result.insertId,
+                        name: req.file.filename,
+                        character_id: req.params.id,
+                        request: {
+                            type: 'GET',
+                            desc: 'return all character images',
+                            url: 'http://localhost:3000/character/'+req.params.id+'/images'
+                        }
+                    }
+                }
+                return res.status(201).send(response)
+        })
+    })
+}
+
 exports.updateCharacter = (req, res, next)=> {
     mysql.getConnection((error, conn) =>{
         if(error) { return res.status(500).send({error: error}) }
@@ -167,7 +192,7 @@ exports.updateCharacter = (req, res, next)=> {
                         }
                     }
                 }
-                res.status(202).send(response)
+                return res.status(202).send(response)
             }
         )
     })
@@ -176,24 +201,28 @@ exports.updateCharacter = (req, res, next)=> {
 exports.deleteCharacter = (req, res, next)=> {
     mysql.getConnection((error, conn) =>{
         if(error) { return res.status(500).send({error: error}) }
-        conn.query('DELETE FROM characters WHERE id = ?',[req.body.id],
+        conn.query('DELETE FROM character_photos WHERE id_character = ?',[req.body.id],
             (error,result,fields) =>{
-                conn.release()
                 if(error) { return res.status(500).send({error: error}) }
-                const response = {
-                    message: 'character successfully deleted',
-                    request: {
-                        type: 'POST',
-                        desc: 'insert a new character',
-                        url: 'http://localhost:3000/character/',
-                        body: {
-                            name: 'STRING',
-                            id_anime: 'INTEGER',
-                            character_image: 'FILE/PNG||JPG||JPEG'
+                conn.query('DELETE FROM characters WHERE id = ?',[req.body.id],
+                    (error,result,fields) =>{
+                        conn.release()
+                        if(error) { return res.status(500).send({error: error}) }
+                        const response = {
+                            message: 'character successfully deleted',
+                            request: {
+                                type: 'POST',
+                                desc: 'insert a new character',
+                                url: 'http://localhost:3000/character/',
+                                body: {
+                                    name: 'STRING',
+                                    id_anime: 'INTEGER',
+                                    character_image: 'FILE/PNG||JPG||JPEG'
+                                }
+                            }
                         }
-                    }
-                }
-                res.status(202).send(response)
+                        return res.status(202).send(response)
+                })
             }
         )
     })
