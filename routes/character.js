@@ -38,5 +38,6 @@ router.post('/:id/images', upload.single('character_image'), CharacterController
 router.post('/', login.required, upload.single('character_image'), CharacterController.insertCharacter)
 router.patch('/', login.required, upload.none(), CharacterController.updateCharacter)
 router.delete('/', login.required, upload.none(), CharacterController.deleteCharacter)
+router.delete('/:id/images', upload.none(), CharacterController.deleteImage)
 
 module.exports = router

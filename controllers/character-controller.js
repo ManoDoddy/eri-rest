@@ -227,3 +227,25 @@ exports.deleteCharacter = (req, res, next)=> {
         )
     })
 }
+
+exports.deleteImage = (req, res, next) => {
+    mysql.getConnection((error, conn) => {
+        if(error) { return res.status(500).send({error: error}) }
+        conn.query('DELETE FROM character_photos WHERE id = ?',[req.body.id], (error, result, fields)=>{
+            conn.release();
+            if(error) { return res.status(500).send({error: error}) }
+            const response = {
+                message: 'character image successfully deleted',
+                request: {
+                    type: 'POST',
+                    desc: 'insert a new character photo',
+                    url: 'http://localhost:3000/character/'+req.params.id+'/images',
+                    body: {
+                        character_image: 'FILE/PNG||JPG||JPEG'
+                    }
+                }
+            }
+            return res.status(202).send(response)
+        })
+    })
+}
