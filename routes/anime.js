@@ -9,6 +9,7 @@ const AnimeController = require('../controllers/anime-controller')
 
 router.get('/', AnimeController.getAnime)
 router.get('/:id', AnimeController.getIndividualAnime)
+router.get('/:id/characters', AnimeController.getAnimeCharacters)
 router.post('/', login.required, upload.none(), AnimeController.insertAnime)
 router.patch('/', login.required, upload.none(), AnimeController.updateAnime)
 router.delete('/', login.required, upload.none(), AnimeController.deleteAnime)

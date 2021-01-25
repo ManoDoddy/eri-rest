@@ -34,10 +34,10 @@ router.get('/', CharacterController.getCharacter)
 router.get('/:id', CharacterController.getIndividualCharacter)
 router.get('/search/:name', CharacterController.searchCharacter)
 router.get('/:id/images', CharacterController.getCharacterImages)
-router.post('/:id/images', upload.single('character_image'), CharacterController.insertCharacterImage)
+router.post('/:id/images', login.required, upload.single('character_image'), CharacterController.insertCharacterImage)
 router.post('/', login.required, upload.single('character_image'), CharacterController.insertCharacter)
 router.patch('/', login.required, upload.none(), CharacterController.updateCharacter)
 router.delete('/', login.required, upload.none(), CharacterController.deleteCharacter)
-router.delete('/:id/images', upload.none(), CharacterController.deleteImage)
+router.delete('/:id/images', login.required, upload.none(), CharacterController.deleteImage)
 
 module.exports = router

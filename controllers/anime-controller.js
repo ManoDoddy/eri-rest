@@ -54,6 +54,39 @@ exports.getIndividualAnime = (req, res, next) => {
     })
 }
 
+exports.getAnimeCharacters = (req, res, next) => {
+    mysql.getConnection((error, conn) =>{
+        if(error) { return res.status(500).send({error: error}) }
+        conn.query('SELECT anime.id AS `anime_id`, anime.name AS `anime_name`, characters.name AS `character_name`, characters.id AS `character_id` FROM anime INNER JOIN characters ON anime.id = characters.id_anime WHERE anime.id = ?',
+        [req.params.id], (error, result, fields) =>{
+            conn.release()
+            if(error) { return res.status(500).send({error: error}) }
+            if(result.length == 0){
+                return res.status(404).send({
+                    message: 'id not found'
+                })
+            }
+            const response = {
+                amount: result.length,
+                anime_id: req.params.id,
+                characters: result.map(char => {
+                    return {
+                        id: char.character_id,
+                        name: char.character_name,
+                        anime_name: char.anime_name,
+                        request: {
+                            type: 'GET',
+                            desc: 'returns individual character details',
+                            url: 'http://localhost:3000/character/'+char.character_id
+                        }
+                    }
+                })
+            }
+            return res.status(200).send(response)
+        })
+    })
+}
+
 exports.insertAnime = (req, res, next)=> {
     mysql.getConnection((error, conn) =>{
         if(error) { return res.status(500).send({error: error}) }

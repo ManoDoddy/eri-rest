@@ -43,7 +43,7 @@ exports.userLogin = (req, res, next) =>{
                         id: results[0].id,
                         username: results[0].username
                     },
-                    'temporary',
+                    process.env.JWT_KEY,
                     {
                         expiresIn: "1h"
                     })
