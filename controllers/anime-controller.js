@@ -57,7 +57,7 @@ exports.getIndividualAnime = (req, res, next) => {
 exports.getAnimeCharacters = (req, res, next) => {
     mysql.getConnection((error, conn) =>{
         if(error) { return res.status(500).send({error: error}) }
-        conn.query('SELECT anime.id AS `anime_id`, anime.name AS `anime_name`, characters.name AS `character_name`, characters.id AS `character_id` FROM anime INNER JOIN characters ON anime.id = characters.id_anime WHERE anime.id = ?',
+        conn.query('SELECT anime.id AS `anime_id`, anime.name AS `anime_name`, characters.name AS `character_name`, characters.id AS `character_id` FROM anime INNER JOIN characters ON anime.id = characters.anime_id WHERE anime.id = ?',
         [req.params.id], (error, result, fields) =>{
             conn.release()
             if(error) { return res.status(500).send({error: error}) }

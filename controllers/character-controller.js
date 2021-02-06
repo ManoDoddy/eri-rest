@@ -3,7 +3,7 @@ const mysql = require('../mysql/mysql').pool
 exports.getCharacter = (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if(error) { return res.status(500).send({error: error}) }
-        conn.query('SELECT characters.id, characters.name, anime.id as `anime_id`, anime.name as `anime_name` FROM characters INNER JOIN anime ON characters.id_anime = anime.id;',
+        conn.query('SELECT characters.id, characters.name, anime.id as `anime_id`, anime.name as `anime_name` FROM characters INNER JOIN anime ON characters.anime_id = anime.id;',
         (error, result, fields) => {
             conn.release()
             if(error) { return res.status(500).send({error: error}) }
@@ -15,7 +15,7 @@ exports.getCharacter = (req, res, next) => {
                         name: char.name,
                         anime_id: char.anime_id,
                         anime_name: char.anime_name,
-                        photos: 'http://localhost:3000/character/'+char.id+'/images',
+                        images: 'http://localhost:3000/character/'+char.id+'/images',
                         request: {
                             type: 'GET',
                             desc: 'returns individual character details',
@@ -32,7 +32,7 @@ exports.getCharacter = (req, res, next) => {
 exports.getIndividualCharacter = (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if(error) { return res.status(500).send({error: error}) }
-        conn.query('SELECT characters.id, characters.name, anime.id as `anime_id`, anime.name as `anime_name` FROM characters INNER JOIN anime ON characters.id_anime = anime.id WHERE characters.id = ?;', [req.params.id],
+        conn.query('SELECT characters.id, characters.name, anime.id as `anime_id`, anime.name as `anime_name` FROM characters INNER JOIN anime ON characters.anime_id = anime.id WHERE characters.id = ?;', [req.params.id],
         (error, result, fields) => {
             conn.release()
             if(error) { return res.status(500).send({error: error}) }
@@ -47,7 +47,7 @@ exports.getIndividualCharacter = (req, res, next) => {
                         name: result[0].name,
                         anime_id: result[0].anime_id,
                         anime_name: result[0].anime_name,
-                        photos: 'http://localhost:3000/character/'+result[0].id+'/images',
+                        images: 'http://localhost:3000/character/'+result[0].id+'/images',
                         request: {
                             type: 'GET',
                             desc: 'return all characters',
@@ -63,7 +63,7 @@ exports.getIndividualCharacter = (req, res, next) => {
 exports.searchCharacter = (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if(error) { return res.status(500).send({error: error}) }
-        conn.query('SELECT characters.id, characters.name, anime.id as `anime_id`, anime.name as `anime_name` FROM characters INNER JOIN anime ON characters.id_anime = anime.id WHERE characters.name = ?;', [req.params.name],
+        conn.query('SELECT characters.id, characters.name, anime.id as `anime_id`, anime.name as `anime_name` FROM characters INNER JOIN anime ON characters.anime_id = anime.id WHERE characters.name LIKE ?;', ['%'+req.params.name+'%'],
         (error, result, fields) => {
             conn.release()
             if(error) { return res.status(500).send({error: error}) }
@@ -72,18 +72,39 @@ exports.searchCharacter = (req, res, next) => {
                     message: 'character not found'
                 })
             }
-            const response = {
-                character: {
-                        id: result[0].id,
-                        name: result[0].name,
-                        anime_id: result[0].anime_id,
-                        anime_name: result[0].anime_name,
-                        photos: 'http://localhost:3000/character/'+result[0].id+'/images',
-                        request: {
-                            type: 'GET',
-                            desc: 'return all characters',
-                            url: 'http://localhost:3000/character/'
+            let response = {}
+            if(result.length>1){
+                response = {
+                    amount: result.length,
+                    characters: result.map(char =>{
+                        return {
+                            id: char.id,
+                            name: char.name,
+                            anime_id: char.anime_id,
+                            anime_name: char.anime_name,
+                            images: 'http://localhost:3000/character/'+char.id+'/images',
+                            request: {
+                                type: 'GET',
+                                desc: 'return all characters',
+                                url: 'http://localhost:3000/character/'
+                            }
                         }
+                    })
+                }
+            }else{
+                response = {
+                    character: {
+                            id: result[0].id,
+                            name: result[0].name,
+                            anime_id: result[0].anime_id,
+                            anime_name: result[0].anime_name,
+                            images: 'http://localhost:3000/character/'+result[0].id+'/images',
+                            request: {
+                                type: 'GET',
+                                desc: 'return all characters',
+                                url: 'http://localhost:3000/character/'
+                            }
+                    }
                 }
             }
             return res.status(200).send(response)
@@ -94,7 +115,7 @@ exports.searchCharacter = (req, res, next) => {
 exports.getCharacterImages = (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if(error) { return res.status(500).send({error: error}) }
-        conn.query('SELECT * FROM character_photos WHERE id_character = ?;', [req.params.id],
+        conn.query('SELECT * FROM character_images WHERE character_id = ?;', [req.params.id],
         (error, result, fields) => {
             conn.release()
             if(error) { return res.status(500).send({error: error}) }
@@ -105,11 +126,11 @@ exports.getCharacterImages = (req, res, next) => {
             }
             const response = {
                 amount: result.length,
-                id_character: req.params.id,
+                character_id: req.params.id,
                 images: result.map(image => {
                     return {
                         id: image.id,
-                        photo: 'http://localhost:3000/images/'+image.name
+                        url: 'http://localhost:3000/images/'+image.filename
                     }
                 })
             }
@@ -121,10 +142,10 @@ exports.getCharacterImages = (req, res, next) => {
 exports.insertCharacter = (req, res, next)=> {
     mysql.getConnection((error, conn) =>{
         if(error) { return res.status(500).send({error: error}) }
-        conn.query('INSERT INTO characters (name, id_anime) VALUES (? , ?)',[req.body.name, req.body.id_anime],
+        conn.query('INSERT INTO characters (name, anime_id) VALUES (? , ?)',[req.body.name, req.body.anime_id],
             (error, result, fields) =>{
                 if(error) { return res.status(500).send({error: error}) }
-                conn.query('INSERT INTO character_photos (id_character, name) VALUES (? , ?)',[result.insertId, req.file.filename],
+                conn.query('INSERT INTO character_images (character_id, filename) VALUES (? , ?)',[result.insertId, req.file.filename],
                     (error, result, fields) => {
                         conn.release()
                         if(error) { return res.status(500).send({error: error}) }
@@ -133,7 +154,7 @@ exports.insertCharacter = (req, res, next)=> {
                             character: {
                                 id: result.insertId,
                                 name: req.body.name,
-                                anime_id: req.body.id_anime,
+                                anime_id: req.body.anime_id,
                                 request: {
                                     type: 'GET',
                                     desc: 'return all characters',
@@ -150,7 +171,7 @@ exports.insertCharacter = (req, res, next)=> {
 exports.insertCharacterImage = (req, res, next)=> {
     mysql.getConnection((error, conn) =>{
         if(error) { return res.status(500).send({error: error}) }
-        conn.query('INSERT INTO character_photos (id_character, name) VALUES (? , ?)',[req.params.id, req.file.filename],
+        conn.query('INSERT INTO character_images (character_id, filename) VALUES (? , ?)',[req.params.id, req.file.filename],
             (error, result, fields) =>{
                 conn.release()
                 if(error) { return res.status(500).send({error: error}) }
@@ -158,7 +179,7 @@ exports.insertCharacterImage = (req, res, next)=> {
                     message: 'character image successfully inserted',
                     image: {
                         id: result.insertId,
-                        name: req.file.filename,
+                        filename: req.file.filename,
                         character_id: req.params.id,
                         request: {
                             type: 'GET',
@@ -175,7 +196,7 @@ exports.insertCharacterImage = (req, res, next)=> {
 exports.updateCharacter = (req, res, next)=> {
     mysql.getConnection((error, conn) =>{
         if(error) { return res.status(500).send({error: error}) }
-        conn.query('UPDATE characters SET name = ?, id_anime = ? WHERE id = ?',[req.body.name,req.body.id_anime,req.body.id],
+        conn.query('UPDATE characters SET name = ?, anime_id = ? WHERE id = ?',[req.body.name,req.body.anime_id,req.body.id],
             (error,result,fields) =>{
                 conn.release()
                 if(error) { return res.status(500).send({error: error}) }
@@ -184,7 +205,7 @@ exports.updateCharacter = (req, res, next)=> {
                     character: {
                         id: req.body.id,
                         name: req.body.name,
-                        id_anime: req.body.id_anime,
+                        anime_id: req.body.anime_id,
                         request: {
                             type: 'GET',
                             desc: 'returns individual character details',
@@ -201,7 +222,7 @@ exports.updateCharacter = (req, res, next)=> {
 exports.deleteCharacter = (req, res, next)=> {
     mysql.getConnection((error, conn) =>{
         if(error) { return res.status(500).send({error: error}) }
-        conn.query('DELETE FROM character_photos WHERE id_character = ?',[req.body.id],
+        conn.query('DELETE FROM character_images WHERE character_id = ?',[req.body.id],
             (error,result,fields) =>{
                 if(error) { return res.status(500).send({error: error}) }
                 conn.query('DELETE FROM characters WHERE id = ?',[req.body.id],
@@ -216,7 +237,7 @@ exports.deleteCharacter = (req, res, next)=> {
                                 url: 'http://localhost:3000/character/',
                                 body: {
                                     name: 'STRING',
-                                    id_anime: 'INTEGER',
+                                    anime_id: 'INTEGER',
                                     character_image: 'FILE/PNG||JPG||JPEG'
                                 }
                             }
@@ -231,14 +252,14 @@ exports.deleteCharacter = (req, res, next)=> {
 exports.deleteImage = (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if(error) { return res.status(500).send({error: error}) }
-        conn.query('DELETE FROM character_photos WHERE id = ?',[req.body.id], (error, result, fields)=>{
+        conn.query('DELETE FROM character_images WHERE id = ?',[req.body.id], (error, result, fields)=>{
             conn.release();
             if(error) { return res.status(500).send({error: error}) }
             const response = {
                 message: 'character image successfully deleted',
                 request: {
                     type: 'POST',
-                    desc: 'insert a new character photo',
+                    desc: 'insert a new character image',
                     url: 'http://localhost:3000/character/'+req.params.id+'/images',
                     body: {
                         character_image: 'FILE/PNG||JPG||JPEG'

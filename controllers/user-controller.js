@@ -32,11 +32,11 @@ exports.userLogin = (req, res, next) =>{
             conn.release()
             if(error) { return res.status(500).send({error: error}) }
             if(results.length < 1){
-                return res.status(401).send({warning: 'authentication error'})
+                return res.status(401).send({message: 'authentication error'})
             }
             bcrypt.compare(req.body.password, results[0].password, (error, result) =>{
                 if (error) {
-                    return res.status(401).send({warning: 'authentication error'})
+                    return res.status(401).send({message: 'authentication error'})
                 }
                 if (result) {
                     const token = jwt.sign({
@@ -47,9 +47,9 @@ exports.userLogin = (req, res, next) =>{
                     {
                         expiresIn: "1h"
                     })
-                    return res.status(202).send({warning: 'authentication success', token: token})
+                    return res.status(202).send({message: 'authentication success', token: token})
                 }
-                return res.status(401).send({warning: 'authentication error'})
+                return res.status(401).send({message: 'authentication error'})
             })
         })
     })
