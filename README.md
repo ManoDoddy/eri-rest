@@ -3,7 +3,8 @@ API criada com o intuito de ser utilizado em conjunto com o Eri Bot.
 
 ### Eri Bot
 Um bot feito para o Discord, totalmente de código aberto com várias funcionalidades bacanas (como um incrível joguinho gacha), segue o link do repositório abaixo =D
-Link: github.com/Hitagi71/Bot
+
+Link: [github.com/Hitagi71/Bot](github.com/Hitagi71/Bot)
 
 ### Funcionalidades!
 
@@ -34,8 +35,6 @@ Licença
 MIT
 
 **Free Software, Hell Yeah!**
-
-[//]: # (These are reference links used in the body of this note and get stripped out when the markdown processor does its job. There is no need to format nicely because it shouldn't be seen. Thanks SO - http://stackoverflow.com/questions/4823468/store-comments-in-markdown-syntax)
 
    [node.js]: <http://nodejs.org>
    [express]: <http://expressjs.com>
