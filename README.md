@@ -4,7 +4,7 @@ API criada com o intuito de ser utilizado em conjunto com o Eri Bot.
 ### Eri Bot
 Um bot feito para o Discord, totalmente de código aberto com várias funcionalidades bacanas (como um incrível joguinho gacha), segue o link do repositório abaixo =D
 
-Link: [github.com/Hitagi71/Bot](github.com/Hitagi71/Bot)
+Link: [https://github.com/Hitagi71/Bot](https://github.com/Hitagi71/Bot)
 
 ### Funcionalidades!
 
@@ -16,7 +16,7 @@ Link: [github.com/Hitagi71/Bot](github.com/Hitagi71/Bot)
 
 Eri API utiliza as seguintes tecnologias em sua estrutura:
 
-* [Node.js] - JavaScript runtime utilizado em eventos de I/O para o backend
+* [Node.js] - JavaScript runtime utilizado em eventos de I/O para o backend.
 * [Express] - Framework web rápido, flexível e minimalista para Node.js
 
 ### Instalação
