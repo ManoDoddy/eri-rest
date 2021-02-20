@@ -1,32 +1,12 @@
 const express = require('express')
 const router = express.Router()
+const ImgurStorage = require('multer-storage-imgur');
 const multer = require('multer')
 const login = require('../middleware/login')
 
-const storage = multer.diskStorage({
-    destination: function (request, file, cb) {
-        cb(null, './images/')
-    },
-    filename: function (request, file, cb) {
-        cb(null, new Date().toISOString().replace(/[:.-]/g, '') + '.' + file.originalname.split('.').pop())
-    },
-})
-
-const fileFilter = (req, file, cb) => {
-    if (file.mimetype === 'image/jpeg' || file.mimetype == 'image/png') {
-        cb(null, true)
-    } else {
-        cb(null, false)
-    }
-}
-
 const upload = multer({
-    storage: storage,
-    limits: {
-        fileSize: 1024 * 1024 * 2,
-    },
-    fileFilter: fileFilter
-})
+    storage: ImgurStorage({ clientId: process.env.IMGUR_CLIENTID })
+  })
 
 const CharacterController = require('../controllers/character-controller')
 

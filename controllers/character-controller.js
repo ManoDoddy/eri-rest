@@ -125,7 +125,7 @@ exports.getCharacterImages = async (req, res, next) => {
             images: result.map(image => {
                 return {
                     id: image.id,
-                    url: process.env.URL_API + 'images/' + image.filename
+                    url: image.filename
                 }
             })
         }
@@ -140,7 +140,7 @@ exports.insertCharacter = async (req, res, next) => {
         const query = 'INSERT INTO characters (name, anime_id) VALUES (? , ?)'
         const result = await mysql.execute(query, [req.body.name, req.body.anime_id])
         const queryImage = 'INSERT INTO character_images (character_id, filename) VALUES (? , ?)'
-        const resultImage = await mysql.execute(queryImage, [result.insertId, req.file.filename])
+        const resultImage = await mysql.execute(queryImage, [result.insertId, req.file.data.link])
         const response = {
             message: 'character successfully inserted',
             character: {
@@ -148,7 +148,7 @@ exports.insertCharacter = async (req, res, next) => {
                 name: req.body.name,
                 anime_id: req.body.anime_id,
                 image_id: resultImage.insertId,
-                filename: req.file.filename,
+                filename: req.file.data.link,
                 request: {
                     type: 'GET',
                     desc: 'return all characters',
@@ -165,12 +165,12 @@ exports.insertCharacter = async (req, res, next) => {
 exports.insertCharacterImage = async (req, res, next) => {
     try {
         const query = 'INSERT INTO character_images (character_id, filename) VALUES (? , ?)'
-        const result = await mysql.execute(query, [req.params.character_id, req.file.filename])
+        const result = await mysql.execute(query, [req.params.character_id, req.file.data.link])
         const response = {
             message: 'character image successfully inserted',
             image: {
                 id: result.insertId,
-                filename: req.file.filename,
+                filename: req.file.data.link,
                 character_id: req.params.character_id,
                 request: {
                     type: 'GET',

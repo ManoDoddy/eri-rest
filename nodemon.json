@@ -7,6 +7,7 @@
         "MYSQL_PORT": 3306,
 
         "JWT_KEY": "development",
-        "URL_API": "http://localhost:3000/"
+        "URL_API": "http://localhost:3000/",
+        "IMGUR_CLIENTID" : "546c25a59c58ad7"
     }
 }
